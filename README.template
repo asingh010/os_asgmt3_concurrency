@@ -1,0 +1,117 @@
+Assignment 3
+
+* Authors: Arshpreet Sidhu
+* Group name: group 94
+
+
+## Overview
+
+Concisely explain what the program does. If this exceeds a couple of
+sentences, you're going too far. Generally, you should be pulling this
+right from the project specification. We don't want you to just cut and
+paste, but paraphrase what is stated in the project specification.
+- This program implements a parallel merge sort algorithm using the pthread 
+library to sort randomly generated integer arrays. The implementation creates 
+multiple threads in a binary tree structure, where each thread handles sorting 
+a portion of the array. This achives significant performance improvements over 
+single threaded merge sort through concurrent execution.
+
+## Manifest
+
+A listing of source files and other non-generated files, and a brief
+(one-line) explanation of the purpose of each file.
+- mergesort.h: Header file containing function prototypes, struct definitions, and global variable declarations
+- mergesort.c: Implementation of parallel merge sort functions including threading logic and memory management
+- test-mergesort.c: Testing program that generates random arrays, measures sorting performance, and validates correctness
+- Makefile: Build configuration file for compiling the project with appropriate flags and linking pthread library
+
+
+## Building the project
+
+This section should tell the user how to build your code.  If you are
+delivering a library, where does it need to be installed, or how do you use
+it? Is this an executable, if so, how can a user get up to speed as fast as
+possible?
+- To build the project, simply run `make` in the project directory. This will compile all source files and create the `test-mergesort` executable.
+- Clean build: Use `make clean` to remove all compiled files, then `make` to rebuild from scratch
+- The build process creates an executable called `test-mergesort` that can be run directly from the command line
+
+## Features and usage
+
+Summarise the main features of your program. It is also appropriate to
+instruct the user how to use your program.
+- Key Features:
+  * Parallel merge sort implementation using pthread library for multi threaded execution
+  * Configurable thread levels (cutoff parameter) to control parallelization depth. (how many thread levels to create)
+  * Single threaded fallback for optimal performance when thread overhead would exceed benefits where cuttoff level is reached or memory fails
+  * Memory efficient implementation using global arrays and proper memory management
+  * Performance timing and correctness validation built into the test program using getMilliSeconds()
+
+- Usage: `./test-mergesort <array_size> <cutoff_level> <random_seed>`
+  * array_size: Number of elements to sort (minimum 2)
+  * cutoff_level: Maximum thread levels (0=single-threaded, 1+=parallel with specified depth)
+  * random_seed: Seed for random number generation (use same seed for reproducible results)
+- Example: `./test-mergesort 1000000 2 1234` sorts 1 million elements using up to 2 thread levels with seed 1234
+
+## Testing
+
+This section should detail how you tested your code. Simply stating "I ran
+it a few times and it seems to work" is not sufficient. Your testing needs
+to be detailed here.
+- Correctness Testing:
+  * Tested with various array sizes from 100 to 100,000,000 elements to ensure sorting correctness
+  * Verified sorted output using the built in check_if_sorted() function for all test cases
+  * Tested edge cases including small arrays 2-10 and different cutoff levels 0-8
+  * Used consistent random seeds to ensure reproducible test results across multiple runs
+- Performance Testing:
+  * Measured performance improvements by comparing cutoff level 0 vs levels 1-5
+  * Achieved approximately 2x speedup with 1 million elements: 0.12s (cutoff 0) vs 0.06s (cutoff 1)
+  * Tested with large arrays (100M elements) to verify substantial performance gains meet requirements
+  * Verified diminishing returns at higher cutoff levels due to thread overhead around level 5
+- Stress Testing:
+  * Ran multiple consecutive tests to check for memory and stability issues
+  * Tested with different random seeds to ensure algorithm works correctly with various data distributions
+  * Verified proper thread synchronization by running tests multiple times without race conditions
+
+## Known Bugs
+
+List known bugs that you weren't able to fix (or ran out of time to fix).
+- No known critical bugs in the current 
+
+## Reflection and Self Assessment
+
+Discuss the issues you encountered during development and testing. What
+problems did you have? What did you have to research and learn on your own?
+What kinds of errors did you get? How did you fix them?
+
+What parts of the project did you find challenging? Is there anything that
+finally "clicked" for you in the process of working on this project? How well
+did the development and testing process go for you?
+- Development Challenges and Processes:
+  * Memory management was initially problematic - had to carefully track allocation and deallocation of argument structures across threads, especialy with both parent and child threads.
+  * Understanding pthread_create() and pthread_join() synchronization took research and experimentation
+  * Researched pthread library documentation and examples to understand proper thread creation and joining
+  * It was good to learn that pthread_join() blocks the parent until the child completes
+  * Initially struggled with the recursive nature of parallel_mergesort() but slicked when i learnet:
+    -  Traditional recursion calls the same function directly but in threading, you call pthread_create() which then calls your function indirectly
+  * Learned about the importance of the cutoff mechanism to prevent excessive thread creation overhead
+  * Gained understanding of how merge sort can be parallelized while maintaining correctness:
+    - Key insight was that merge sort is naturally parallelizable because the left and right halves are independent
+    - The critical point is synchronization: you MUST wait for both halves to complete before merging
+  * Used incremental development: Version 1 (single threaded), Version 2 (basic threading but with bugs), Version 3 (production ready)
+  * Testing was crucial at each stage to catch bugs early and validate performance improvements
+    - correctness -> performance -> stress testing
+  * The modular approach made debugging much easier and allowed for systematic improvement
+
+## Sources Used
+
+If you used any sources outside of the textbook, you should list them here. 
+If you looked something up on stackoverflow.com or you use help from AI, and 
+fail to cite it in this section, it will be considered plagiarism and dealt 
+with accordingly. So be safe CITE!
+- AI assistance was used to understand Makefiles and build processes
+- AI was utilised to understand parallelization implementation concepts for parallel_mergesort function
+- AI helped with debugging memory management issues 
+- AI also used to fix spelling errors in README.template and fix formatting
+- Referenced pthread library documentation for proper usage of pthread_create() and pthread_join() functions
+- Course lecture materials and textbook provided foundational understanding of merge sort algorithm and concurrency
